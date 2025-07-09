@@ -185,9 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
             node.groups = groupMap[node.id] || [];
         });
 
+        // Add a scale for node sizes
+        const sizeScale = d3.scaleSqrt()
+            .domain([0, d3.max(graph.nodes, d => d.research_papers)])
+            .range([15, 80]); // Min and max radius size
+
         simulation = d3.forceSimulation(graph.nodes)
-            .force('charge', d3.forceManyBody().strength(-300)) // Relaxed repulsion
-            .force('collision', d3.forceCollide().radius(45)) // Relaxed collision
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('collision', d3.forceCollide().radius(d => sizeScale(d.research_papers) + 5)) // Dynamic collision radius
             .force('hull', forceHull(graph.groups))
             .force('cluster', forceClusterRepulsion(graph.groups)); // Add cluster repulsion
 
@@ -205,8 +210,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 .attr('y', '0')
                 .append('image')
                 .attr('xlink:href', node.url_image)
-                .attr('height', 60)
-                .attr('width', 60);
+                .attr('height', d => sizeScale(node.research_papers) * 2) // Match the circle diameter
+                .attr('width', d => sizeScale(node.research_papers) * 2);  // Match the circle diameter
         });
 
         const node = nodeGroup.selectAll('.node-group')
@@ -233,12 +238,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         node.append('circle')
             .attr('class', 'node')
-            .attr('r', 30)
+            .attr('r', d => sizeScale(d.research_papers)) // Dynamic radius
             .style('fill', d => `url(#img-${d.id.replace(/\s+/g, '-')})`);
 
         node.append('text')
             .attr('class', 'node-label')
-            .attr('y', -35) // Position above the node circle
+            .attr('y', d => -sizeScale(d.research_papers) - 5) // Position above the node circle
             .text(d => d.name);
             
         const hulls = hullGroup.selectAll('.hull')
@@ -270,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Handle single-person groups by drawing a circle
                 if (nodePoints.length === 1) {
                     const node = nodePoints[0];
-                    const radius = 45; // Radius for the container circle
+                    const radius = sizeScale(node.research_papers) + 15; // Adjusted radius for single-node hull
                     group.centroid = [node.x, node.y];
                     // Define hull points for force calculations
                     group.hullPoints = [
@@ -298,10 +303,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 group.centroid = d3.polygonCentroid(hull);
 
-                const padding = 45;
+                const padding = 45; // This can remain constant or be dynamic
                 const paddedPoints = hull.map(p => {
                     const angle = Math.atan2(p[1] - group.centroid[1], p[0] - group.centroid[0]);
-                    return [p[0] + padding * Math.cos(angle), p[1] + padding * Math.sin(angle)];
+                    const nodeRadius = sizeScale(graph.nodes.find(n => n.x === p[0] && n.y === p[1])?.research_papers || 0) || 30;
+                    const dynamicPadding = nodeRadius + 15;
+                    return [p[0] + dynamicPadding * Math.cos(angle), p[1] + dynamicPadding * Math.sin(angle)];
                 });
 
                 group.hullPoints = paddedPoints;

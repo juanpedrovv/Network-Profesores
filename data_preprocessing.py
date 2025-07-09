@@ -261,6 +261,13 @@ def main():
         
         df_final = map_interest_areas_with_ai(df_final, method=method, min_score=min_score)
 
+    # Contar research papers
+    if 'scraped_info' in df_final.columns:
+        df_final['research_papers'] = df_final['scraped_info'].apply(
+            lambda x: len(x) if isinstance(x, list) else 0
+        )
+        print("Columna 'research_papers' añadida con el conteo de publicaciones.")
+
     # Eliminar columnas que ya no son necesarias para el JSON final
     df_final.drop(columns=['normalized_name', 'normalized_scraped_name'], inplace=True, errors='ignore')
     
