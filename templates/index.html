@@ -7,17 +7,30 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Red de Profesores de UTEC</h1>
-    <div class="controls">
+<div class="header">
+    <h1>Visualizador de Red de Investigadores</h1>
+</div>
+<div class="filter-controls">
+    <div class="filter-group">
         <label for="group-by">Agrupar por:</label>
         <select id="group-by">
             <option value="interest_areas">Áreas de Interés</option>
-            <option value="specialization">Carrera</option>
+            <option value="specialization">Especialización</option>
         </select>
     </div>
-    <div id="graph-container">
-        <div id="tooltip" class="tooltip"></div>
+    <div class="filter-group">
+        <label>Nivel Académico:</label>
+        <div id="degree-filter" class="checkbox-group">
+            <label><input type="checkbox" value="PhD" checked> PhD</label>
+            <label><input type="checkbox" value="Master" checked> Master</label>
+            <label><input type="checkbox" value="Bachelor" checked> Bachelor</label>
+        </div>
     </div>
+</div>
+
+<div id="graph-container">
+    <div id="tooltip"></div>
+</div>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="{{ url_for('static', filename='graph.js') }}"></script>
 </body>

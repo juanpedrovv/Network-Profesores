@@ -1,5 +1,5 @@
 function forceHull(groups) {
-    const strength = 1.2; // Significantly increased strength
+    const strength = 1.2; // Increased strength significantly
 
     function force(alpha) {
         for (const node of force.nodes) {
@@ -28,8 +28,8 @@ function forceHull(groups) {
 }
 
 function forceClusterRepulsion(groups) {
-    const strength = 0.8;
-    const radius = 350; // Minimum distance between group centroids
+    const strength = 5; // Increased strength
+    const radius = 1; // Increased minimum distance
 
     function force(alpha) {
         for (let i = 0; i < groups.length; i++) {
@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const graphContainer = document.getElementById('graph-container');
     const tooltip = document.getElementById('tooltip');
     const groupBySelect = document.getElementById('group-by');
+    const degreeFilterCheckboxes = document.querySelectorAll('#degree-filter input[type="checkbox"]');
 
     const width = graphContainer.clientWidth;
     const height = graphContainer.clientHeight || window.innerHeight * 0.8;
@@ -107,13 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const color = d3.scaleOrdinal(d3.schemeSet3); // More distinct colors
     let simulation;
+    let originalGraphData = { nodes: [], groups: [] };
 
-    async function updateGraph(groupBy) {
-        const response = await fetch(`/graph-data?groupBy=${groupBy}`);
-        const graph = await response.json();
-
+    function renderGraph(graph) {
         // Reset zoom and pan on new data
-        const initialTransform = d3.zoomIdentity.translate(-width / 2, -height / 2).scale(0.5);
+        const initialTransform = d3.zoomIdentity.translate(width / 2, height / 2).scale(0.5);
         svg.call(zoom.transform, initialTransform);
 
         container.selectAll('*').remove(); // Clear previous graph elements from container
@@ -127,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .data(graph.groups)
             .enter().append('g')
             .attr('class', 'legend-item')
-            .attr('transform', (d, i) => `translate(0, ${i * 25})`)
+            .attr('transform', (d, i) => `translate(0, ${i * 30})`) // Increased vertical spacing
             .on('mouseover', (event, d_legend) => {
                 const groupIndex = graph.groups.findIndex(g => g.name === d_legend.name);
 
@@ -154,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add a background rect for better hover detection
         legendItem.append('rect')
             .attr('width', 300)
-            .attr('height', 25)
+            .attr('height', 30) // Increased height to match spacing
             .style('fill', 'transparent');
 
         legendItem.append('rect')
@@ -191,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .range([15, 80]); // Min and max radius size
 
         simulation = d3.forceSimulation(graph.nodes)
-            .force('charge', d3.forceManyBody().strength(-300))
+            .force('charge', d3.forceManyBody().strength(-250)) // Reduced charge strength
             .force('collision', d3.forceCollide().radius(d => sizeScale(d.research_papers) + 5)) // Dynamic collision radius
             .force('hull', forceHull(graph.groups))
             .force('cluster', forceClusterRepulsion(graph.groups)); // Add cluster repulsion
@@ -342,9 +341,46 @@ document.addEventListener('DOMContentLoaded', () => {
             .on('end', dragended);
     }
 
+    function applyFiltersAndRender() {
+        const selectedDegrees = Array.from(degreeFilterCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        if (selectedDegrees.length === 0) {
+            renderGraph({ nodes: [], groups: [] });
+            return;
+        }
+
+        const filteredNodes = originalGraphData.nodes.filter(node =>
+            selectedDegrees.includes(node.degree_level)
+        );
+
+        const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+
+        const filteredGroups = originalGraphData.groups
+            .map(group => {
+                const newMembers = group.members.filter(memberId => filteredNodeIds.has(memberId));
+                return { ...group, members: newMembers };
+            })
+            .filter(group => group.members.length > 0);
+
+        renderGraph({ nodes: filteredNodes, groups: filteredGroups });
+    }
+
+    async function fetchDataAndRender(groupBy) {
+        const response = await fetch(`/graph-data?groupBy=${groupBy}`);
+        originalGraphData = await response.json();
+        applyFiltersAndRender();
+    }
+
+
     groupBySelect.addEventListener('change', () => {
-        updateGraph(groupBySelect.value);
+        fetchDataAndRender(groupBySelect.value);
     });
 
-    updateGraph(groupBySelect.value);
+    degreeFilterCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', applyFiltersAndRender);
+    });
+
+    fetchDataAndRender(groupBySelect.value);
 }); 
