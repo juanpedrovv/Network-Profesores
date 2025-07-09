@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+.env
+venv/
+env/
+
+# Data files (opcional - decides si quieres versionar los datos)
+*.json
+*.csv
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/

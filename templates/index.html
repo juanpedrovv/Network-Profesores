@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red de Profesores UTEC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Red de Profesores de UTEC</h1>
+    <div class="controls">
+        <label for="group-by">Agrupar por:</label>
+        <select id="group-by">
+            <option value="interest_areas">Áreas de Interés</option>
+            <option value="specialization">Carrera</option>
+        </select>
+    </div>
+    <div id="graph-container">
+        <div id="tooltip" class="tooltip"></div>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="{{ url_for('static', filename='graph.js') }}"></script>
+</body>
+</html> 

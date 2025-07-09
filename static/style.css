@@ -1,0 +1,86 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0; /* Remove padding */
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    padding: 20px; /* Add padding */
+}
+
+.controls {
+    text-align: center;
+    padding-bottom: 20px; /* Add padding */
+}
+
+#graph-container {
+    width: 100%;
+    max-width: none;
+    height: 95vh;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    position: relative;
+    margin: 0;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+.node {
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+.node-group {
+    cursor: pointer;
+}
+
+.node-label {
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: middle;
+    fill: #000;
+    pointer-events: none;
+    paint-order: stroke;
+    stroke: #fff;
+    stroke-width: 2.5px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.hull {
+    fill-opacity: 0.2;
+    stroke-opacity: 0.5;
+    stroke-linejoin: round;
+    pointer-events: all; /* Make the shape hoverable */
+}
+
+.legend {
+    font-size: 14px;
+}
+
+.legend-item {
+    cursor: pointer;
+}
+
+.legend-color-box {
+    stroke: #666;
+    stroke-width: 1px;
+}
+
+.legend-text {
+    dominant-baseline: middle;
+}
+
+.tooltip {
+    position: absolute;
+    display: none;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    pointer-events: none; /* So the mouse events go through to the elements underneath */
+    font-size: 14px;
+} 
